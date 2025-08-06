@@ -1,0 +1,11 @@
+# .dockerignore
+__pycache__
+*.pyc
+.git
+.gitignore
+tests/
+*.xlsx
+*.png
+*.pptx
+.pytest_cache/
+*.csv
