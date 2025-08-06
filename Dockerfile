@@ -1,7 +1,7 @@
 # Dockerfile
-FROM python:3.8-slim-bullseye
+FROM python:3.13-slim
 
-# Set up inotify limits
+# Set up inotify limits to prevent previous error
 RUN echo "fs.inotify.max_user_watches=524288" >> /etc/sysctl.conf \
     && echo "fs.inotify.max_user_instances=512" >> /etc/sysctl.conf \
     && sysctl -p
@@ -10,7 +10,8 @@ RUN echo "fs.inotify.max_user_watches=524288" >> /etc/sysctl.conf \
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
-    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    ca-certificates \
+    && wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
     && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
     && apt-get update \
     && apt-get install -y google-chrome-stable \
