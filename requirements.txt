@@ -4,3 +4,4 @@ Plotly
 python-pptx
 openpyxl
 pytest
+kaleido
