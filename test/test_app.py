@@ -1,7 +1,8 @@
 # tests/test_app.py
 import pytest
 import pandas as pd
-from app import load_data  # Adjust import based on your app.py structure
+import plotly.express as px
+from app import load_data, create_bar_chart
 
 def test_load_data():
     # Create a sample Excel file for testing
@@ -13,3 +14,11 @@ def test_load_data():
     assert not df.empty, "DataFrame should not be empty"
     assert list(df.columns) == ["Product", "Sales"], "Columns should match input data"
     assert len(df) == 2, "DataFrame should have 2 rows"
+
+def test_create_bar_chart():
+    # Test chart creation
+    df = pd.DataFrame({"Product": ["A", "B"], "Sales": [100, 200]})
+    fig = create_bar_chart(df, "Product", "Sales")
+    assert fig is not None, "Chart should be created"
+    assert fig.layout.xaxis.title.text == "Product", "X-axis title should be 'Product'"
+    assert fig.layout.yaxis.title.text == "Sales", "Y-axis title should be 'Sales'"
