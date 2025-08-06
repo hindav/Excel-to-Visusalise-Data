@@ -31,7 +31,7 @@ jobs:
     - name: Run tests
       run: |
         if [ -d "tests" ]; then
-          pytest tests/ --verbose || echo "No tests found or tests failed, continuing..."
+          pytest tests/ --verbose || echo "Tests failed, continuing..."
         else
           echo "Tests directory not found, skipping tests..."
         fi
