@@ -1,6 +1,11 @@
 # Dockerfile
 FROM python:3.8-slim-bullseye
 
+# Set up inotify limits
+RUN echo "fs.inotify.max_user_watches=524288" >> /etc/sysctl.conf \
+    && echo "fs.inotify.max_user_instances=512" >> /etc/sysctl.conf \
+    && sysctl -p
+
 # Install system dependencies and Google Chrome
 RUN apt-get update && apt-get install -y \
     wget \
