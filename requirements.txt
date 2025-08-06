@@ -3,3 +3,4 @@ Pandas
 Plotly
 python-pptx
 openpyxl
+pytest
