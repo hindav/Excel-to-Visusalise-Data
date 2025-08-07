@@ -1,7 +1,5 @@
-Streamlit
-Pandas
-Plotly
+streamlit
+pandas
+plotly
 python-pptx
 openpyxl
-pytest
-kaleido

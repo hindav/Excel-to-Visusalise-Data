@@ -6,60 +6,57 @@ from pptx.util import Inches
 
 def automatic_chart_analysis(df: pd.DataFrame):
     """Automatically generate charts based on the analysis of the DataFrame."""
-    charts = []  # List to hold generated charts
-
-    # Identify numerical and categorical columns
+    charts = []
     numerical_cols = df.select_dtypes(include=['number']).columns.tolist()
     categorical_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
 
-    # Generate automatic visualizations
     if numerical_cols and categorical_cols:
         for cat_col in categorical_cols:
             for num_col in numerical_cols:
                 fig = px.bar(df, x=cat_col, y=num_col, title=f"{cat_col} vs {num_col}")
                 charts.append(fig)
-
-    # Generate histograms for numerical columns
     for num_col in numerical_cols:
         fig = px.histogram(df, x=num_col, title=f"Histogram of {num_col}")
         charts.append(fig)
-
-    # Generate scatter plots for pairs of numerical columns
     for i in range(len(numerical_cols)):
         for j in range(i + 1, len(numerical_cols)):
             fig = px.scatter(df, x=numerical_cols[i], y=numerical_cols[j], title=f"{numerical_cols[i]} vs {numerical_cols[j]}")
             charts.append(fig)
-
-    # Correlation matrix
     if len(numerical_cols) > 1:
         correlation_matrix = df[numerical_cols].corr()
         fig = px.imshow(correlation_matrix, text_auto=True, title="Correlation Matrix")
         charts.append(fig)
-
     return charts
 
-def create_ppt(charts: list, file_path: str = "automatic_chart_analysis.pptx"):
-    """Create a PowerPoint presentation from the list of charts."""
+def create_ppt(charts: list, df: pd.DataFrame, ppt_name: str = "Chart_Analysis") -> str:
+    """Creates a PowerPoint presentation with chart summaries and data tables."""
     prs = Presentation()
-
     for idx, fig in enumerate(charts):
-        try:
-            # Save the figure to a BytesIO object
-            img_stream = BytesIO()
-            fig.write_image(img_stream, format='png')  # Requires kaleido
-            img_stream.seek(0)
+        slide = prs.slides.add_slide(prs.slide_layouts[5])
+        title = slide.shapes.title
+        title.text = f"Chart {idx + 1}: {fig.layout.title.text or 'No Title'}"
 
-            # Add a slide with a title and content layout
-            slide = prs.slides.add_slide(prs.slide_layouts[5])  # Title only layout
-            slide.shapes.title.text = f"Chart {idx+1}"
+        # Add description box
+        left, top, width, height = Inches(1), Inches(2), Inches(8), Inches(2)
+        textbox = slide.shapes.add_textbox(left, top, width, height)
+        tf = textbox.text_frame
+        tf.text = (
+            "Interactive chart available in the app or as HTML download.\n"
+            "Use the downloaded CSV to recreate this chart in PowerPoint."
+        )
 
-            # Add the image to the slide
-            left = Inches(1)
-            top = Inches(1.5)
-            slide.shapes.add_picture(img_stream, left, top, width=Inches(8))
-        except Exception as e:
-            print(f"Error adding chart {idx+1}: {e}")
+        # Add data table (simplified example)
+        if fig.data[0].x is not None and fig.data[0].y is not None:
+            rows = min(len(fig.data[0].x), 5)  # Limit to 5 rows for brevity
+            cols = 2
+            table = slide.shapes.add_table(rows + 1, cols, Inches(1), Inches(4), Inches(8), Inches(2)).table
+            table.cell(0, 0).text = fig.layout.xaxis.title.text or "X"
+            table.cell(0, 1).text = fig.layout.yaxis.title.text or "Y"
+            for i in range(rows):
+                table.cell(i + 1, 0).text = str(fig.data[0].x[i])
+                table.cell(i + 1, 1).text = str(fig.data[0].y[i])
 
-    # Save the presentation to a file
-    prs.save(file_path)
-    return file_path
+    # Save to temporary file with dynamic name
+    pptx_file = f"PPT_by_Hindav_{ppt_name}.pptx"
+    prs.save(pptx_file)
+    return pptx_file
